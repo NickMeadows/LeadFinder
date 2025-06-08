@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <title>LeadFinder</title>
+</head>
+<body>
+  <h1>Latest Leads</h1>
+  {% if articles %}
+    {% for article in articles %}
+      <div style="margin-bottom: 20px;">
+        <h3><a href="{{ article['url'] }}" target="_blank">{{ article['title'] }}</a></h3>
+        <p>{{ article['summary'] }}</p>
+        <p><strong>Source:</strong> {{ article['source'] }} | <strong>Date:</strong> {{ article['published_at'] }}</p>
+        <form method="post" action="{{ url_for('main.update_note', article_id=article['id']) }}">
+          <textarea name="note" rows="2" cols="60">{{ article['notes'] }}</textarea><br>
+          <button type="submit">Save Note</button>
+        </form>
+        <hr>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No articles found.</p>
+  {% endif %}
+</body>
+</html>
