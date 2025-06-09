@@ -14,8 +14,8 @@ def ingest_articles(articles):
         exists = db.execute("SELECT 1 FROM articles WHERE url = ?", (article['url'],)).fetchone()
         if not exists:
             db.execute("""
-                INSERT INTO articles (title, url, summary, source, published_at, tags, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO articles (title, url, summary, source, published_at, tags, relevance_score, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 article["title"],
                 article["url"],
@@ -23,6 +23,7 @@ def ingest_articles(articles):
                 article["source"],
                 article["published_at"],
                 article["tags"],
+                article["relevance_score"],
                 article["notes"]
             ))
     db.commit()

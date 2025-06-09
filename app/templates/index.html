@@ -1,25 +1,76 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <title>LeadFinder</title>
+  <meta charset="utf-8">
+  <title>LeadFinder Dashboard</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+      background-color: #f4f4f4;
+    }
+    .card {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      margin-top: 0;
+    }
+    .tags {
+      margin-top: 0.5rem;
+    }
+    .tag {
+      display: inline-block;
+      background-color: #007bff;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      margin-right: 0.3rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .note-box {
+      margin-top: 1rem;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+    }
+    button {
+      margin-top: 0.5rem;
+    }
+  </style>
 </head>
 <body>
-  <h1>Latest Leads</h1>
+  <h1>Relevant News & Leads</h1>
+
   {% if articles %}
     {% for article in articles %}
-      <div style="margin-bottom: 20px;">
+      <div class="card">
         <h3><a href="{{ article['url'] }}" target="_blank">{{ article['title'] }}</a></h3>
         <p>{{ article['summary'] }}</p>
-        <p><strong>Source:</strong> {{ article['source'] }} | <strong>Date:</strong> {{ article['published_at'] }}</p>
-        <form method="post" action="{{ url_for('main.update_note', article_id=article['id']) }}">
-          <textarea name="note" rows="2" cols="60">{{ article['notes'] }}</textarea><br>
-          <button type="submit">Save Note</button>
-        </form>
-        <hr>
+        <p><strong>Source:</strong> {{ article['source'] }} |
+           <strong>Date:</strong> {{ article['published_at'] }} |
+           <strong>Score:</strong> {{ article['relevance_score'] }}</p>
+
+        <div class="tags">
+          {% for tag in article['tags'].split(',') if tag %}
+            <span class="tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="note-box">
+          <form method="post" action="{{ url_for('main.update_note', article_id=article['id']) }}">
+            <textarea name="note">{{ article['notes'] }}</textarea><br>
+            <button type="submit">Save Note</button>
+          </form>
+        </div>
       </div>
     {% endfor %}
   {% else %}
-    <p>No articles found.</p>
+    <p>No relevant articles found.</p>
   {% endif %}
 </body>
 </html>

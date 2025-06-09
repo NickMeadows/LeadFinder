@@ -1,42 +1,50 @@
-from scrapers.base import BaseScraper
-import requests
-from bs4 import BeautifulSoup
+import feedparser
 from datetime import datetime
+from scrapers.base import BaseScraper
 
+# Keyword categories for tagging and scoring
+KEYWORDS = {
+    "education": ["education", "college", "curriculum", "STEM", "learning", "university"],
+    "skills": ["skills", "upskilling", "training", "apprenticeship", "vocational", "NVQ"],
+    "funding": ["funding", "grant", "bid", "£", "million", "investment"],
+    "partnerships": ["employer", "industry", "partner", "collaboration", "business"],
+    "infrastructure": ["facility", "building", "digital", "equipment", "infrastructure"],
+}
+
+# Tag and score articles based on keyword matches
+def tag_article(title, summary):
+    tags = set()
+    score = 0
+    text = f"{title} {summary}".lower()
+    for tag, words in KEYWORDS.items():
+        if any(word in text for word in words):
+            tags.add(tag)
+            score += 1
+    return list(tags), score
+
+# Main scraper class
 class CheshireLiveScraper(BaseScraper):
     @property
     def source(self):
-        return "Cheshire Live"
+        return "Cheshire Live (RSS)"
 
     def fetch(self):
-        url = "https://www.cheshire-live.co.uk/news/"
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
+        url = "https://www.cheshire-live.co.uk/news/?service=rss"
+        feed = feedparser.parse(url)
 
         articles = []
+        for entry in feed.entries:
+            tags, score = tag_article(entry.title, entry.summary)
 
-        for item in soup.select("div.teaser"):
-            title_el = item.select_one("h3.teaser__headline")
-            link_el = item.select_one("a")
-            summary_el = item.select_one("p")
-
-            if title_el and link_el:
-                title = title_el.get_text(strip=True)
-                link = link_el["href"]
-                summary = summary_el.get_text(strip=True) if summary_el else ""
-
-                # Ensure absolute URLs
-                if link.startswith("/"):
-                    link = "https://www.cheshire-live.co.uk" + link
-
-                articles.append({
-                    "title": title,
-                    "url": link,
-                    "summary": summary,
-                    "source": self.source,
-                    "published_at": datetime.now().isoformat(),
-                    "tags": "",
-                    "notes": ""
-                })
+            articles.append({
+                "title": entry.title,
+                "url": entry.link,
+                "summary": entry.summary,
+                "source": self.source,
+                "published_at": entry.published if "published" in entry else datetime.now().isoformat(),
+                "tags": ",".join(tags),
+                "notes": "",
+                "relevance_score": score
+            })
 
         return articles

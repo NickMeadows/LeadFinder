@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS articles (
     source TEXT,
     published_at TEXT,
     tags TEXT,
+    relevannce_score INTEGER DEFAULT 0,
     is_seen INTEGER DEFAULT 0,
     notes TEXT DEFAULT ''
 );

@@ -6,7 +6,9 @@ main = Blueprint('main', __name__)
 @main.route('/')
 def index():
     db = get_db()
-    articles = db.execute('SELECT * FROM articles ORDER BY published_at DESC').fetchall()
+    articles = db.execute(
+    'SELECT * FROM articles WHERE relevance_score >= 1 ORDER BY published_at DESC'
+    ).fetchall()
     return render_template('index.html', articles=articles)
 
 @main.route('/note/<int:article_id>', methods=['POST'])
